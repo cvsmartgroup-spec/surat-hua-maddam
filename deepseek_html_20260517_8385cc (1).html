@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuratKu - Kop Surat SD Negeri 1 Tri Mulya</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        /* Login Overlay (sama seperti sebelumnya, disederhanakan) */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .login-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        .login-container button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .login-error {
+            color: red;
+            margin-top: 10px;
+            display: none;
+        }
+
+        /* Navbar & Hero (ringkas) */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+        .nav-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: var(--text);
+            cursor: pointer;
+        }
+        .btn-nav {
+            background: var(--primary);
+            color: white !important;
+            padding: 8px 20px;
+            border-radius: 30px;
+        }
+        .hero {
+            padding: 120px 20px 60px;
+            text-align: center;
+            background: linear-gradient(180deg, #eff6ff, white);
+        }
+        .hero h1 { font-size: 2.5rem; }
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 30px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        footer {
+            background: #1e293b;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* MODAL APLIKASI */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-app {
+            background: white;
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+        .row-2cols {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+        }
+        .preview-container {
+            margin-top: 30px;
+            background: #fef9e3;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #fde047;
+        }
+        /* Kop surat style */
+        .kop-surat {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #000;
+        }
+        .kop-surat img {
+            max-width: 80px;
+            max-height: 80px;
+            margin: 0 10px;
+            vertical-align: middle;
+        }
+        .kop-teks {
+            display: inline-block;
+            text-align: center;
+        }
+        .kop-teks h2 {
+            font-size: 1.2rem;
+            margin: 0;
+        }
+        .kop-teks h3 {
+            font-size: 1rem;
+            margin: 0;
+        }
+        .kop-teks p {
+            font-size: 0.8rem;
+            margin: 5px 0;
+        }
+        .body-surat {
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .surat-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .surat-table th, .surat-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+        .tab {
+            padding: 8px 20px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: 600;
+        }
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+        }
+        .file-info {
+            font-size: 0.8rem;
+            color: #4b5563;
+            margin-top: 5px;
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+        @media print {
+            .modal-header, .tabs, .app-form, button, .no-print {
+                display: none;
+            }
+            .modal-app {
+                all: initial;
+                width: 100%;
+                height: auto;
+            }
+            .preview-container {
+                margin: 0;
+                padding: 0;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="loginOverlay">
+    <div class="login-container">
+        <h2>📋 SuratKu</h2>
+        <p>SD Negeri 1 Tri Mulya</p>
+        <input type="text" id="loginUser" placeholder="Username" autocomplete="off">
+        <input type="password" id="loginPass" placeholder="Password">
+        <button onclick="handleLogin()">Masuk</button>
+        <div class="login-error" id="loginErrorMsg">Username atau password salah</div>
+        <p style="margin-top: 15px; font-size: 0.8rem;">Demo: admin/admin atau user/user123</p>
+    </div>
+</div>
+
+<!-- NAVBAR SEDERHANA -->
+<nav class="navbar">
+    <div><strong>📋 SuratKu - SDN 1 Tri Mulya</strong></div>
+    <div class="nav-links">
+        <a onclick="scrollToSection('beranda')">Beranda</a>
+        <a onclick="scrollToSection('fitur')">Fitur</a>
+        <a class="btn-nav" onclick="bukaAplikasi()">Buka Aplikasi</a>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section id="beranda" class="hero">
+    <h1>Sistem Manajemen Surat</h1>
+    <p>Dengan Kop Surat Resmi SD Negeri 1 Tri Mulya - Dinas Pendidikan Kab. Tanah Bumbu</p>
+    <button class="btn" onclick="bukaAplikasi()">🚀 Mulai Sekarang</button>
+    <button class="btn btn-outline" onclick="scrollToSection('fitur')">Pelajari</button>
+</section>
+
+<section id="fitur" style="padding: 60px 20px; text-align: center;">
+    <h2>✨ Fitur Unggulan</h2>
+    <p>Preview surat dengan kop resmi, upload logo, lampiran (max 1MB), dan cetak</p>
+</section>
+
+<footer>
+    &copy; 2025 SD Negeri 1 Tri Mulya - Sistem Surat Digital
+</footer>
+
+<!-- MODAL APLIKASI UTAMA -->
+<div class="modal-overlay" id="modalApp">
+    <div class="modal-app">
+        <div class="modal-header">
+            <h2>📝 Aplikasi Surat - SDN 1 Tri Mulya</h2>
+            <button onclick="tutupAplikasi()" style="background: none; border: none; color: white; font-size: 24px;">✕</button>
+        </div>
+        <div class="modal-body" id="appBody">
+            <!-- Konten akan diisi JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // ==================== DATA & STORAGE ====================
+    let users = [
+        { username: "admin", password: "admin", role: "admin" },
+        { username: "user", password: "user123", role: "user" }
+    ];
+    let currentUser = null;
+    let daftarSurat = JSON.parse(localStorage.getItem("daftarSurat")) || [];
+    let logoInstansi = localStorage.getItem("logoInstansi") || null;
+    let logoKabupaten = localStorage.getItem("logoKabupaten") || null;
+
+    function simpanSurat() {
+        localStorage.setItem("daftarSurat", JSON.stringify(daftarSurat));
+    }
+
+    // ==================== LOGIN ====================
+    window.handleLogin = function() {
+        const user = document.getElementById("loginUser").value.trim();
+        const pass = document.getElementById("loginPass").value.trim();
+        const found = users.find(u => u.username === user && u.password === pass);
+        if (found) {
+            currentUser = found;
+            sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
+            document.getElementById("loginOverlay").classList.add("hidden");
+            bukaAplikasi();
+        } else {
+            const errDiv = document.getElementById("loginErrorMsg");
+            errDiv.style.display = "block";
+            setTimeout(() => errDiv.style.display = "none", 2000);
+        }
+    };
+
+    function checkSession() {
+        const saved = sessionStorage.getItem("currentUser");
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            document.getElementById("loginOverlay").classList.add("hidden");
+        } else {
+            document.getElementById("loginOverlay").classList.remove("hidden");
+        }
+    }
+
+    // ==================== APLIKASI ====================
+    window.bukaAplikasi = function() {
+        if (!currentUser) {
+            document.getElementById("loginOverlay").classList.remove("hidden");
+            return;
+        }
+        renderApp();
+        document.getElementById("modalApp").classList.add("active");
+    };
+    window.tutupAplikasi = function() {
+        document.getElementById("modalApp").classList.remove("active");
+    };
+
+    function renderApp() {
+        const appBody = document.getElementById("appBody");
+        appBody.innerHTML = `
+            <div class="tabs">
+                <button class="tab active" data-tab="buat">✍️ Buat Surat Baru</button>
+                <button class="tab" data-tab="arsip">📂 Arsip Surat</button>
+                <button class="tab" data-tab="logo">🖼️ Pengaturan Logo</button>
+            </div>
+            <div id="tabContent">
+                ${renderFormSurat()}
+            </div>
+        `;
+        // Event tab
+        document.querySelectorAll(".tab").forEach(tab => {
+            tab.addEventListener("click", (e) => {
+                document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+                const target = tab.dataset.tab;
+                const contentDiv = document.getElementById("tabContent");
+                if (target === "buat") contentDiv.innerHTML = renderFormSurat();
+                else if (target === "arsip") contentDiv.innerHTML = renderArsipSurat();
+                else if (target === "logo") contentDiv.innerHTML = renderPengaturanLogo();
+                attachFormEvents();
+            });
+        });
+        attachFormEvents();
+    }
+
+    // Form surat keluar (format resmi dengan kop)
+    function renderFormSurat() {
+        return `
+            <div style="background: #f9fafb; padding: 20px; border-radius: 16px;">
+                <h3>📄 Buat Surat Resmi (Keluar)</h3>
+                <div class="row-2cols">
+                    <div class="form-group"><label>Nomor Surat *</label><input type="text" id="noSurat" placeholder="Contoh: 421.2/001/SD.1/2025"></div>
+                    <div class="form-group"><label>Sifat Surat</label>
+                        <select id="sifat"><option>Biasa</option><option>Penting</option><option>Rahasia</option></select>
+                    </div>
+                </div>
+                <div class="row-2cols">
+                    <div class="form-group"><label>Lampiran (teks)</label><input type="text" id="lampiran" placeholder="(misal: 1 berkas)"></div>
+                    <div class="form-group"><label>Tanggal Surat</label><input type="date" id="tanggalSurat" value="${new Date().toISOString().slice(0,10)}"></div>
+                </div>
+                <div class="form-group"><label>Perihal</label><input type="text" id="perihal" placeholder="Perihal surat..."></div>
+                <div class="form-group"><label>Tujuan (Kepada)</label><input type="text" id="tujuan" placeholder="Yth. Kepala Dinas Pendidikan..."></div>
+                <div class="form-group"><label>Isi Surat (ringkasan)</label><textarea id="isiSurat" rows="4" placeholder="Tulis isi surat di sini..."></textarea></div>
+                <div class="form-group">
+                    <label>Upload Lampiran File (max 1 MB, format gambar/PDF)</label>
+                    <input type="file" id="fileLampiran" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                    <div id="fileError" class="error-message"></div>
+                    <div id="fileInfo" class="file-info"></div>
+                </div>
+                <button class="btn-secondary" onclick="simpanSuratBaru()">💾 Simpan & Preview</button>
+            </div>
+            <div id="previewSuratArea" style="margin-top: 30px;"></div>
+        `;
+    }
+
+    // Validasi ukuran file maksimal 1MB
+    function isValidFileSize(file) {
+        const maxSize = 1 * 1024 * 1024; // 1MB
+        if (file && file.size > maxSize) {
+            return false;
+        }
+        return true;
+    }
+
+    // Fungsi simpan surat dengan validasi ukuran file
+    window.simpanSuratBaru = function() {
+        const noSurat = document.getElementById("noSurat").value;
+        if (!noSurat) {
+            alert("Nomor surat wajib diisi!");
+            return;
+        }
+
+        const fileInput = document.getElementById("fileLampiran");
+        const file = fileInput.files[0];
+        const errorDiv = document.getElementById("fileError");
+        const infoDiv = document.getElementById("fileInfo");
+        
+        // Reset pesan error
+        if (errorDiv) errorDiv.innerText = "";
+        if (infoDiv) infoDiv.innerText = "";
+
+        if (file && !isValidFileSize(file)) {
+            if (errorDiv) errorDiv.innerText = "❌ Ukuran file melebihi 1 MB. Silakan pilih file yang lebih kecil.";
+            return;
+        }
+
+        let lampiranFile = null;
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                lampiranFile = e.target.result;
+                simpanKeArray(lampiranFile);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            simpanKeArray(null);
+        }
+
+        function simpanKeArray(fileData) {
+            const newSurat = {
+                id: Date.now(),
+                noSurat: noSurat,
+                sifat: document.getElementById("sifat").value,
+                lampiran: document.getElementById("lampiran").value || "-",
+                tanggal: document.getElementById("tanggalSurat").value,
+                perihal: document.getElementById("perihal").value,
+                tujuan: document.getElementById("tujuan").value,
+                isi: document.getElementById("isiSurat").value,
+                fileLampiran: fileData, // base64 string atau null
+                fileNama: file ? file.name : null,
+                createdAt: new Date().toISOString()
+            };
+            daftarSurat.unshift(newSurat);
+            simpanSurat();
+            // Tampilkan preview langsung
+            tampilkanPreview(newSurat);
+            // Kosongkan form file agar tidak upload ulang
+            if (fileInput) fileInput.value = "";
+            if (infoDiv) infoDiv.innerText = "✅ File berhasil diunggah (max 1MB).";
+            setTimeout(() => { if(infoDiv) infoDiv.innerText = ""; }, 3000);
+        }
+    };
+
+    function tampilkanPreview(surat) {
+        const previewDiv = document.getElementById("previewSuratArea");
+        if (!previewDiv) return;
+        
+        // Tampilkan lampiran file dengan baik (link atau preview gambar)
+        let lampiranHtml = '';
+        if (surat.fileLampiran) {
+            const fileType = surat.fileNama ? surat.fileNama.split('.').pop().toLowerCase() : '';
+            if (fileType === 'jpg' || fileType === 'jpeg' || fileType === 'png' || fileType === 'gif') {
+                lampiranHtml = `<p><strong>Lampiran File:</strong> <a href="${surat.fileLampiran}" target="_blank"><img src="${surat.fileLampiran}" style="max-width: 200px; max-height: 150px; border: 1px solid #ccc; margin-top: 5px;"></a><br><small>${surat.fileNama}</small></p>`;
+            } else {
+                lampiranHtml = `<p><strong>Lampiran File:</strong> <a href="${surat.fileLampiran}" target="_blank">📎 ${surat.fileNama || 'Lihat Lampiran'}</a></p>`;
+            }
+        } else {
+            lampiranHtml = `<p><strong>Lampiran File:</strong> Tidak ada</p>`;
+        }
+
+        previewDiv.innerHTML = `
+            <div style="background: white; border: 1px solid #ddd; border-radius: 12px; padding: 25px; box-shadow: var(--shadow);">
+                <div class="kop-surat">
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        ${logoKabupaten ? `<img src="${logoKabupaten}" style="max-height: 70px;">` : `<div style="width:70px;"></div>`}
+                        <div class="kop-teks">
+                            <h2>PEMERINTAH KABUPATEN TANAH BUMBU</h2>
+                            <h3>DINAS PENDIDIKAN</h3>
+                            <h3 style="font-size: 1.1rem;">SD NEGERI 1 TRI MULYA</h3>
+                            <p>NPSN.30303646 TERAKREDITASI B (82) TAHUN 2021</p>
+                            <p>Alamat : Sebamban 1 Blok. H RT.04 RW.02 Desa Biduri Bersujud, Kec. Sungai Loban, Tanah Bumbu 72274</p>
+                            <p>Email: sdn1trimulyabiduribersujud@gmail.com - HP.083140831336</p>
+                        </div>
+                        ${logoInstansi ? `<img src="${logoInstansi}" style="max-height: 70px;">` : `<div style="width:70px;"></div>`}
+                    </div>
+                    <hr style="margin-top: 8px; border: 1px solid black;">
+                </div>
+
+                <div class="body-surat">
+                    <p style="text-align: right;">${surat.tanggal}</p>
+                    <p>Nomor     : ${surat.noSurat}</p>
+                    <p>Sifat     : ${surat.sifat}</p>
+                    <p>Lampiran  : ${surat.lampiran}</p>
+                    <p>Perihal   : ${surat.perihal}</p>
+                    <p>Kepada Yth. <br> ${surat.tujuan}</p>
+                    <p>di tempat</p>
+                    <div style="margin: 20px 0;">
+                        <p>Dengan hormat,</p>
+                        <p>${surat.isi.replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <p>Demikian surat ini disampaikan, atas perhatiannya diucapkan terima kasih.</p>
+                    <br><br>
+                    <p style="text-align: right;">${surat.tanggal}<br>Kepala Sekolah,</p>
+                    <br><br>
+                    <p style="text-align: right;"><u><strong>Nama Kepala Sekolah</strong></u><br>NIP. 196912312002121001</p>
+                    ${lampiranHtml}
+                </div>
+                <div style="margin-top: 20px; text-align: center;" class="no-print">
+                    <button class="btn" onclick="window.print()">🖨️ Cetak Surat</button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Arsip surat
+    function renderArsipSurat() {
+        if (daftarSurat.length === 0) return "<p>Belum ada surat. Buat surat baru dulu.</p>";
+        return `
+            <input type="text" id="cariArsip" placeholder="🔍 Cari nomor/perihal..." onkeyup="filterArsip()" style="margin-bottom: 15px; padding: 8px; width: 100%;">
+            <table class="surat-table">
+                <thead><tr><th>No</th><th>Nomor Surat</th><th>Perihal</th><th>Tujuan</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+                <tbody id="tabelArsip">
+                    ${daftarSurat.map((s, idx) => `
+                        <tr>
+                            <td>${idx+1}</td>
+                            <td>${s.noSurat}</td>
+                            <td>${s.perihal}</td>
+                            <td>${s.tujuan}</td>
+                            <td>${s.tanggal}</td>
+                            <td>
+                                <button onclick="lihatPreviewArsip('${s.id}')" style="background: #2563eb; color: white; border: none; padding: 4px 12px; border-radius: 16px;">Preview</button>
+                                <button onclick="hapusSurat('${s.id}')" style="background: #dc2626; color: white; border: none; padding: 4px 12px; border-radius: 16px;">Hapus</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            <div id="previewArsipDetail" style="margin-top: 20px;"></div>
+        `;
+    }
+
+    window.lihatPreviewArsip = function(id) {
+        const surat = daftarSurat.find(s => s.id == id);
+        if (surat) {
+            const container = document.getElementById("previewArsipDetail");
+            tampilkanPreviewDiDiv(surat, container);
+        }
+    };
+    
+    function tampilkanPreviewDiDiv(surat, container) {
+        let lampiranHtml = '';
+        if (surat.fileLampiran) {
+            const fileType = surat.fileNama ? surat.fileNama.split('.').pop().toLowerCase() : '';
+            if (fileType === 'jpg' || fileType === 'jpeg' || fileType === 'png' || fileType === 'gif') {
+                lampiranHtml = `<p><strong>Lampiran File:</strong> <a href="${surat.fileLampiran}" target="_blank"><img src="${surat.fileLampiran}" style="max-width: 200px; max-height: 150px; border: 1px solid #ccc;"></a><br><small>${surat.fileNama}</small></p>`;
+            } else {
+                lampiranHtml = `<p><strong>Lampiran File:</strong> <a href="${surat.fileLampiran}" target="_blank">📎 ${surat.fileNama || 'Lihat Lampiran'}</a></p>`;
+            }
+        } else {
+            lampiranHtml = `<p><strong>Lampiran File:</strong> Tidak ada</p>`;
+        }
+        
+        container.innerHTML = `
+            <div style="background: white; border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin-top: 15px;">
+                <div class="kop-surat">
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        ${logoKabupaten ? `<img src="${logoKabupaten}" style="max-height: 60px;">` : ''}
+                        <div class="kop-teks">
+                            <h3>PEMERINTAH KABUPATEN TANAH BUMBU</h3>
+                            <h4>DINAS PENDIDIKAN SD NEGERI 1 TRI MULYA</h4>
+                            <p>NPSN.30303646 - Alamat: Sebamban 1 Blok. H ...</p>
+                        </div>
+                        ${logoInstansi ? `<img src="${logoInstansi}" style="max-height: 60px;">` : ''}
+                    </div>
+                    <hr>
+                </div>
+                <p><strong>Nomor:</strong> ${surat.noSurat}</p>
+                <p><strong>Sifat:</strong> ${surat.sifat}</p>
+                <p><strong>Lampiran (teks):</strong> ${surat.lampiran}</p>
+                <p><strong>Perihal:</strong> ${surat.perihal}</p>
+                <p><strong>Tujuan:</strong> ${surat.tujuan}</p>
+                <p><strong>Isi:</strong> ${surat.isi.replace(/\n/g, '<br>')}</p>
+                ${lampiranHtml}
+                <button class="btn" onclick="window.print()">Cetak</button>
+            </div>
+        `;
+    }
+
+    window.filterArsip = function() {
+        const keyword = document.getElementById("cariArsip").value.toLowerCase();
+        const rows = document.querySelectorAll("#tabelArsip tr");
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(keyword) ? "" : "none";
+        });
+    };
+    window.hapusSurat = function(id) {
+        if (confirm("Hapus surat ini?")) {
+            daftarSurat = daftarSurat.filter(s => s.id != id);
+            simpanSurat();
+            renderApp();
+        }
+    };
+
+    // Pengaturan logo
+    function renderPengaturanLogo() {
+        return `
+            <div style="background: #f9fafb; padding: 20px; border-radius: 16px;">
+                <h3>Upload Logo Instansi & Kabupaten</h3>
+                <div class="form-group"><label>Logo Kabupaten Tanah Bumbu</label><input type="file" id="uploadKab" accept="image/*"></div>
+                <div class="form-group"><label>Logo Sekolah (SDN 1 Tri Mulya)</label><input type="file" id="uploadSekolah" accept="image/*"></div>
+                <button class="btn-secondary" onclick="simpanLogo()">Simpan Logo</button>
+                <hr>
+                <h3>Ubah Password</h3>
+                <div class="form-group"><label>Password Baru</label><input type="password" id="newPassword" placeholder="Minimal 4 karakter"></div>
+                <button class="btn-secondary" onclick="ubahPassword()">Ganti Password</button>
+            </div>
+        `;
+    }
+    window.simpanLogo = function() {
+        const kabFile = document.getElementById("uploadKab")?.files[0];
+        const sklFile = document.getElementById("uploadSekolah")?.files[0];
+        if (kabFile) {
+            const reader = new FileReader();
+            reader.onload = e => { logoKabupaten = e.target.result; localStorage.setItem("logoKabupaten", logoKabupaten); renderApp(); };
+            reader.readAsDataURL(kabFile);
+        }
+        if (sklFile) {
+            const reader = new FileReader();
+            reader.onload = e => { logoInstansi = e.target.result; localStorage.setItem("logoInstansi", logoInstansi); renderApp(); };
+            reader.readAsDataURL(sklFile);
+        }
+        if (!kabFile && !sklFile) alert("Pilih file gambar terlebih dahulu");
+    };
+    window.ubahPassword = function() {
+        const newPass = document.getElementById("newPassword")?.value;
+        if (!currentUser) return;
+        if (newPass && newPass.length >= 4) {
+            currentUser.password = newPass;
+            const idx = users.findIndex(u => u.username === currentUser.username);
+            if (idx !== -1) users[idx].password = newPass;
+            sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
+            alert("Password berhasil diubah!");
+        } else alert("Password minimal 4 karakter");
+    };
+
+    function attachFormEvents() {
+        // Event listener untuk validasi file secara realtime
+        const fileInput = document.getElementById("fileLampiran");
+        if (fileInput) {
+            fileInput.addEventListener("change", function(e) {
+                const file = e.target.files[0];
+                const errorDiv = document.getElementById("fileError");
+                if (file && !isValidFileSize(file)) {
+                    errorDiv.innerText = "❌ Ukuran file melebihi 1 MB. Maksimal 1 MB.";
+                    fileInput.value = "";
+                } else {
+                    errorDiv.innerText = "";
+                }
+            });
+        }
+    }
+    // Scroll & menu
+    window.scrollToSection = function(id) {
+        document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+    };
+    window.addEventListener("load", () => {
+        checkSession();
+    });
+</script>
+</body>
+</html>

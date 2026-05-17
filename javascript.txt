@@ -1,0 +1,1694 @@
+[5/17/2026 7:37 PM] Hardy Cuank: <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuratKu - Sistem Surat Menyurat Modern</title>
+    <meta name="description" content="Sistem manajemen surat menyurat digital dengan fitur lengkap.">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --secondary: #059669;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+            --radius-full: 9999px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+            min-height: 100vh;
+        }
+
+        /* ========== LOGIN OVERLAY ========== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e40af 100%);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.5s ease;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .login-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 35px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.5s ease;
+            position: relative;
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header .login-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 2em;
+            color: white;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+        }
+        .login-header h2 {
+            font-size: 1.6em;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .login-header p {
+            color: #64748b;
+            font-size: 0.9em;
+        }
+        .login-form .form-group {
+            margin-bottom: 18px;
+        }
+        .login-form label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #475569;
+            font-size: 0.9em;
+        }
+        .login-form input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+[5/17/2026 7:37 PM] Hardy Cuank: font-family: inherit;
+        }
+        .login-form input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+        .login-form .input-icon {
+            position: relative;
+        }
+        .login-form .input-icon .icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            color: #94a3b8;
+            pointer-events: none;
+        }
+        .login-form .input-icon input {
+            padding-left: 44px;
+        }
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.05em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
+        }
+        .btn-login:active {
+            transform: translateY(0);
+        }
+        .login-error {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 16px;
+            display: none;
+            text-align: center;
+            font-weight: 500;
+            border: 1px solid #fecaca;
+        }
+        .login-error.show {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-8px);
+            }
+            75% {
+                transform: translateX(8px);
+            }
+        }
+
+        /* ========== NAVBAR ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .navbar.scrolled {
+            box-shadow: var(--shadow);
+            padding: 12px 0;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            color: white;
+        }
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            list-style: none;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            padding: 10px 18px;
+            border-radius: var(--radius-full);
+            transition: var(--transition);
+            font-size: 0.95em;
+[5/17/2026 7:37 PM] Hardy Cuank: cursor: pointer;
+        }
+        .nav-links a:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .btn-nav {
+            background: var(--primary) !important;
+            color: white !important;
+            font-weight: 600 !important;
+            padding: 12px 24px !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+        .btn-nav:hover {
+            background: var(--primary-dark) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
+        }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 5px;
+            z-index: 1001;
+            background: none;
+            border: none;
+            padding: 5px;
+        }
+        .hamburger span {
+            width: 28px;
+            height: 3px;
+            background: var(--text);
+            border-radius: 3px;
+            transition: var(--transition);
+        }
+
+        /* ========== HERO ========== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 120px 24px 60px;
+            background: linear-gradient(180deg, #eff6ff 0%, #f8fafc 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background:
+                radial-gradient(circle at 30% 50%, rgba(37, 99, 235, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(5, 150, 105, 0.06) 0%, transparent 50%);
+        }
+        .hero-content {
+            max-width: 750px;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .hero-badge {
+            display: inline-block;
+            background: white;
+            color: var(--primary);
+            padding: 8px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+        .hero h1 {
+            font-size: 3em;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 1.15em;
+            color: var(--text-light);
+            margin-bottom: 36px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            padding: 14px 30px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 1em;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+[5/17/2026 7:37 PM] Hardy Cuank: box-shadow: 0 6px 25px rgba(37, 99, 235, 0.4);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 35px rgba(37, 99, 235, 0.5);
+        }
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-outline:hover {
+            background: var(--primary-light);
+            transform: translateY(-3px);
+        }
+
+        /* ========== SECTIONS ========== */
+        section {
+            padding: 80px 24px;
+        }
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-header h2 {
+            font-size: 2.2em;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1em;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ========== FEATURES ========== */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: white;
+            padding: 32px 24px;
+            border-radius: var(--radius);
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: transparent;
+        }
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            font-size: 1.8em;
+        }
+        .feature-card:nth-child(1) .feature-icon {
+            background: #dbeafe;
+        }
+        .feature-card:nth-child(2) .feature-icon {
+            background: #d1fae5;
+        }
+        .feature-card:nth-child(3) .feature-icon {
+            background: #fef3c7;
+        }
+        .feature-card:nth-child(4) .feature-icon {
+            background: #fee2e2;
+        }
+        .feature-card:nth-child(5) .feature-icon {
+            background: #e0e7ff;
+        }
+        .feature-card:nth-child(6) .feature-icon {
+            background: #fce7f3;
+        }
+        .feature-card h3 {
+            font-size: 1.2em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 0.95em;
+        }
+
+        /* ========== STATS ========== */
+        .stats-section {
+            background: linear-gradient(135deg, #1e40af, #2563eb);
+            color: white;
+            padding: 60px 24px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .stat-item h3 {
+            font-size: 2.8em;
+            font-weight: 800;
+        }
+        .stat-item p {
+            opacity: 0.85;
+            font-size: 1.05em;
+        }
+
+        /* ========== HOW IT WORKS ========== */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .step-card {
+            text-align: center;
+            padding: 24px;
+        }
+[5/17/2026 7:37 PM] Hardy Cuank: .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            font-size: 1.4em;
+            font-weight: 800;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+        }
+        .step-card h3 {
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+        .step-card p {
+            color: var(--text-light);
+            font-size: 0.95em;
+        }
+
+        /* ========== CTA ========== */
+        .cta-section {
+            text-align: center;
+            background: white;
+        }
+        .cta-box {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 48px 32px;
+            background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+            border-radius: var(--radius);
+            border: 2px dashed #bfdbfe;
+        }
+        .cta-box h2 {
+            font-size: 1.8em;
+            margin-bottom: 14px;
+            font-weight: 800;
+        }
+        .cta-box p {
+            color: var(--text-light);
+            margin-bottom: 24px;
+        }
+
+        /* ========== FOOTER ========== */
+        footer {
+            background: #1e293b;
+            color: #94a3b8;
+            text-align: center;
+            padding: 24px;
+            font-size: 0.9em;
+        }
+        footer a {
+            color: #93c5fd;
+            text-decoration: none;
+        }
+
+        /* ========== MODAL APLIKASI ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .modal-app {
+            background: white;
+            border-radius: 16px;
+            width: 96%;
+            max-width: 1300px;
+            height: 92vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUpModal 0.4s ease;
+        }
+        @keyframes slideUpModal {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            border-radius: 16px 16px 0 0;
+        }
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+        .modal-header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-info-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            cursor: pointer;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            transition: all 0.3s;
+            border: none;
+            color: white;
+            font-family: inherit;
+        }
+        .user-info-bar:hover {
+            background: rgba(255, 255, 255, 0.25);
+[5/17/2026 7:37 PM] Hardy Cuank: }
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85em;
+        }
+        .modal-close {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: rotate(90deg);
+        }
+        .modal-body {
+            flex: 1;
+            overflow: hidden;
+            border-radius: 0 0 16px 16px;
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 75%;
+                max-width: 350px;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                padding: 100px 30px 30px;
+                box-shadow: var(--shadow-lg);
+                transition: var(--transition);
+                gap: 20px;
+            }
+            .nav-links.active {
+                right: 0;
+            }
+            .hamburger {
+                display: flex;
+            }
+            .hero h1 {
+                font-size: 2em;
+            }
+            .hero p {
+                font-size: 1em;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal-app {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            .modal-header {
+                border-radius: 0;
+            }
+            .modal-body {
+                border-radius: 0;
+            }
+            .login-container {
+                padding: 30px 22px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== LOGIN OVERLAY ==================== -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="login-icon">📋</div>
+                <h2>Selamat Datang di SuratKu</h2>
+                <p>Silakan login untuk melanjutkan</p>
+            </div>
+            <div class="login-error" id="loginError">⚠️ Username atau password salah!</div>
+            <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <div class="input-icon">
+                        <span class="icon">👤</span>
+                        <input type="text" id="loginUsername" placeholder="Masukkan username" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <div class="input-icon">
+                        <span class="icon">🔒</span>
+                        <input type="password" id="loginPassword" placeholder="Masukkan password" required autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn-login">🔑 Masuk ke SuratKu</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== NAVBAR ==================== -->
+[5/17/2026 7:37 PM] Hardy Cuank: <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a class="logo" onclick="scrollToTop()">
+                <div class="logo-icon">📋</div>
+                SuratKu
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a onclick="scrollToSection('beranda')">Beranda</a></li>
+                <li><a onclick="scrollToSection('fitur')">Fitur</a></li>
+                <li><a onclick="scrollToSection('cara-kerja')">Cara Kerja</a></li>
+                <li><a onclick="scrollToSection('mulai')">Mulai</a></li>
+                <li><a class="btn-nav" onclick="bukaAplikasi()">🚀 Buka Aplikasi</a></li>
+            </ul>
+            <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ==================== HERO ==================== -->
+    <section class="hero" id="beranda">
+        <div class="hero-content">
+            <div class="hero-badge">🇮🇩 Sistem Surat Menyurat Digital</div>
+            <h1>Kelola Surat dengan Mudah, Cepat & Profesional</h1>
+            <p>
+                Sistem manajemen surat masuk dan keluar lengkap dengan upload logo instansi,
+                lampiran, nomor surat kustom, dan preview cetak profesional.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="bukaAplikasi()">🚀 Mulai Gratis Sekarang</button>
+                <button class="btn btn-outline" onclick="scrollToSection('fitur')">🔍 Jelajahi Fitur</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FEATURES ==================== -->
+    <section id="fitur">
+        <div class="section-header">
+            <h2>✨ Fitur Lengkap</h2>
+            <p>Semua yang Anda butuhkan untuk mengelola surat-menyurat dalam satu platform</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card"><div class="feature-icon">📝</div><h3>Surat Masuk & Keluar</h3><p>Kelola surat dengan nomor yang bisa diisi manual atau otomatis.</p></div>
+            <div class="feature-card"><div class="feature-icon">🏫</div><h3>Upload Logo Instansi</h3><p>Upload logo sekolah dan logo kabupaten untuk kop surat profesional.</p></div>
+            <div class="feature-card"><div class="feature-icon">📎</div><h3>Upload Lampiran</h3><p>Lampirkan file PDF, gambar, atau dokumen pendukung.</p></div>
+            <div class="feature-card"><div class="feature-icon">🔍</div><h3>Pencarian Cepat</h3><p>Cari surat berdasarkan nomor, pengirim, penerima, atau perihal.</p></div>
+            <div class="feature-card"><div class="feature-icon">🖨️</div><h3>Preview & Cetak</h3><p>Preview surat lengkap dengan kop dan logo sebelum mencetak.</p></div>
+            <div class="feature-card"><div class="feature-icon">🔐</div><h3>Login Multi-User</h3><p>Sistem login dengan fitur ubah password untuk keamanan.</p></div>
+        </div>
+    </section>
+
+    <!-- ==================== STATS ==================== -->
+    <section class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-item"><h3>100%</h3><p>Gratis Digunakan</p></div>
+            <div class="stat-item"><h3>1 File</h3><p>Mudah Dijalankan</p></div>
+            <div class="stat-item"><h3>Multi</h3><p>User Access</p></div>
+            <div class="stat-item"><h3>24/7</h3><p>Akses Offline</p></div>
+        </div>
+    </section>
+
+    <!-- ==================== HOW IT WORKS ==================== -->
+    <section id="cara-kerja">
+        <div class="section-header"><h2>🚀 Cara Memulai</h2><p>Hanya 3 langkah mudah</p></div>
+        <div class="steps">
+            <div class="step-card"><div class="step-number">1</div><h3>Login ke Sistem</h3><p>Masuk dengan akun Anda. Password bisa diubah di Pengaturan.</p></div>
+[5/17/2026 7:37 PM] Hardy Cuank: <div class="step-card"><div class="step-number">2</div><h3>Upload Logo & Buat Surat</h3><p>Upload logo instansi, isi form surat, dan lampirkan file.</p></div>
+            <div class="step-card"><div class="step-number">3</div><h3>Cetak & Arsipkan</h3><p>Preview surat dengan kop dan logo, cetak, lalu arsipkan.</p></div>
+        </div>
+    </section>
+
+    <!-- ==================== CTA ==================== -->
+    <section class="cta-section" id="mulai">
+        <div class="cta-box">
+            <h2>💡 Siap Mengelola Surat Secara Digital?</h2>
+            <p>Login, upload logo instansi Anda, dan mulai buat surat profesional. <strong>100% gratis!</strong></p>
+            <button class="btn btn-primary" onclick="bukaAplikasi()" style="font-size:1.1em;padding:16px 36px;">🚀 Buka Aplikasi Sekarang</button>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <p>&copy; 2026 <strong>SuratKu</strong> — Sistem Surat Menyurat Digital. Dibuat dengan ❤️</p>
+    </footer>
+
+    <!-- ==================== MODAL APLIKASI ==================== -->
+    <div class="modal-overlay" id="appModal">
+        <div class="modal-app">
+            <div class="modal-header">
+                <h2>📋 SuratKu</h2>
+                <div class="modal-header-right">
+                    <button class="user-info-bar" id="userInfoBar" onclick="logout()" title="Klik untuk logout">
+                        <span class="user-avatar" id="userAvatar">?</span>
+                        <span id="userNameDisplay">User</span>
+                        <span>↩️</span>
+                    </button>
+                    <button class="modal-close" onclick="tutupAplikasi()" aria-label="Tutup">✕</button>
+                </div>
+            </div>
+            <div class="modal-body" id="appContainer"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL UBAH PASSWORD ==================== -->
+    <div id="modalUbahPassword" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:10001;justify-content:center;align-items:center;">
+        <div style="background:white;border-radius:16px;padding:30px;max-width:420px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:slideUpModal 0.4s ease;">
+            <h3 style="margin-bottom:20px;color:#2563eb;text-align:center;">🔒 Ubah Password</h3>
+            <div id="ubahPasswordError" style="background:#fef2f2;color:#dc2626;padding:10px;border-radius:8px;font-size:0.9em;margin-bottom:14px;display:none;text-align:center;"></div>
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="font-weight:600;color:#475569;font-size:0.9em;">Password Lama</label>
+                <input type="password" id="oldPassword" style="width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95em;font-family:inherit;" placeholder="Masukkan password lama">
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="font-weight:600;color:#475569;font-size:0.9em;">Password Baru</label>
+                <input type="password" id="newPassword" style="width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95em;font-family:inherit;" placeholder="Masukkan password baru (min 6 karakter)">
+            </div>
+            <div class="form-group" style="margin-bottom:20px;">
+                <label style="font-weight:600;color:#475569;font-size:0.9em;">Konfirmasi Password Baru</label>
+                <input type="password" id="confirmNewPassword" style="width:100%;padding:10px 14px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95em;font-family:inherit;" placeholder="Ulangi password baru">
+            </div>
+[5/17/2026 7:37 PM] Hardy Cuank: <div style="display:flex;gap:10px;">
+                <button onclick="simpanPasswordBaru()" style="flex:1;padding:12px;background:#2563eb;color:white;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.95em;">💾 Simpan</button>
+                <button onclick="tutupModalPassword()" style="flex:1;padding:12px;background:#e2e8f0;color:#475569;border:none;border-radius:10px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.95em;">❌ Batal</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== USER DATABASE (localStorage) ====================
+        const USERS_STORAGE_KEY = 'suratku_users';
+
+        function getDefaultUsers() {
+            return {
+                'admin': { password: 'admin123', nama: 'Administrator', role: 'admin', initial: 'A' },
+                'staff': { password: 'staff123', nama: 'Staff Tata Usaha', role: 'staff', initial: 'S' },
+                'kepsek': { password: 'kepsek123', nama: 'Kepala Sekolah', role: 'admin', initial: 'K' },
+                'guru': { password: 'guru123', nama: 'Guru', role: 'staff', initial: 'G' },
+            };
+        }
+
+        function getUsers() {
+            try {
+                const saved = localStorage.getItem(USERS_STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    // Merge dengan default (jika ada user baru di default)
+                    const defaults = getDefaultUsers();
+                    for (const [key, value] of Object.entries(defaults)) {
+                        if (!parsed[key]) {
+                            parsed[key] = value;
+                        }
+                    }
+                    return parsed;
+                }
+            } catch (e) {}
+            // First time: simpan default
+            const defaults = getDefaultUsers();
+            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(defaults));
+            return defaults;
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+        }
+
+        function updateUserPassword(username, newPassword) {
+            const users = getUsers();
+            if (users[username]) {
+                users[username].password = newPassword;
+                saveUsers(users);
+                // Update currentUser jika yang diubah adalah user yang sedang login
+                if (currentUser && currentUser.username === username) {
+                    currentUser.password = newPassword;
+                    sessionStorage.setItem('suratku_user', JSON.stringify(currentUser));
+                }
+                return true;
+            }
+            return false;
+        }
+
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // ==================== LOGIN SYSTEM ====================
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            const errorEl = document.getElementById('loginError');
+
+            // Reset error
+            errorEl.classList.remove('show');
+
+            // Validasi input
+            if (!username || !password) {
+                errorEl.textContent = '⚠️ Username dan password harus diisi!';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            const users = getUsers();
+
+            // Cek user exists
+            if (!users[username]) {
+                errorEl.textContent = '⚠️ Username tidak ditemukan!';
+                errorEl.classList.add('show');
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginPassword').focus();
+                return;
+            }
+[5/17/2026 7:37 PM] Hardy Cuank: // Cek password
+            if (users[username].password !== password) {
+                errorEl.textContent = '⚠️ Password salah! Silakan coba lagi.';
+                errorEl.classList.add('show');
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginPassword').focus();
+                return;
+            }
+
+            // Login sukses
+            currentUser = {
+                username: username,
+                ...users[username]
+            };
+            isLoggedIn = true;
+
+            // Simpan session
+            sessionStorage.setItem('suratku_user', JSON.stringify(currentUser));
+
+            // Sembunyikan login
+            document.getElementById('loginOverlay').classList.add('hidden');
+
+            // Bersihkan form dan error
+            document.getElementById('loginForm').reset();
+            errorEl.classList.remove('show');
+
+            // Tampilkan toast
+            showToastGlobal(✅ Selamat datang, ${currentUser.nama}!);
+
+            // Update user info di modal
+            updateUserDisplay();
+        }
+
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                currentUser = null;
+                isLoggedIn = false;
+                sessionStorage.removeItem('suratku_user');
+
+                // Tampilkan login overlay
+                document.getElementById('loginOverlay').classList.remove('hidden');
+
+                // Tutup modal aplikasi
+                document.getElementById('appModal').classList.remove('active');
+                document.body.style.overflow = '';
+
+                // Reset aplikasi
+                appInitialized = false;
+                document.getElementById('appContainer').innerHTML = '';
+
+                showToastGlobal('👋 Anda telah logout');
+            }
+        }
+
+        function checkSession() {
+            const savedUser = sessionStorage.getItem('suratku_user');
+            if (savedUser) {
+                try {
+                    const parsed = JSON.parse(savedUser);
+                    const users = getUsers();
+                    // Verifikasi user masih ada dan password cocok
+                    if (users[parsed.username] && users[parsed.username].password === parsed.password) {
+                        currentUser = { ...parsed, ...users[parsed.username] };
+                        isLoggedIn = true;
+                        document.getElementById('loginOverlay').classList.add('hidden');
+                        updateUserDisplay();
+                        return true;
+                    }
+                } catch (e) {}
+            }
+            // Tampilkan login
+            document.getElementById('loginOverlay').classList.remove('hidden');
+            return false;
+        }
+
+        function updateUserDisplay() {
+            const avatarEl = document.getElementById('userAvatar');
+            const nameEl = document.getElementById('userNameDisplay');
+            if (currentUser && avatarEl && nameEl) {
+                avatarEl.textContent = currentUser.initial || currentUser.nama.charAt(0).toUpperCase();
+                nameEl.textContent = currentUser.nama;
+            }
+        }
+
+        function requireLogin() {
+            if (!isLoggedIn) {
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                showToastGlobal('⚠️ Silakan login terlebih dahulu', true);
+                return false;
+            }
+            return true;
+        }
+
+        // ==================== UBAH PASSWORD ====================
+        function bukaModalPassword() {
+            document.getElementById('modalUbahPassword').style.display = 'flex';
+            document.getElementById('ubahPasswordError').style.display = 'none';
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+            document.getElementById('oldPassword').focus();
+        }
+[5/17/2026 7:37 PM] Hardy Cuank: function tutupModalPassword() {
+            document.getElementById('modalUbahPassword').style.display = 'none';
+        }
+
+        function simpanPasswordBaru() {
+            const oldPass = document.getElementById('oldPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirmPass = document.getElementById('confirmNewPassword').value;
+            const errorEl = document.getElementById('ubahPasswordError');
+
+            // Reset error
+            errorEl.style.display = 'none';
+
+            // Validasi
+            if (!oldPass  !newPass  !confirmPass) {
+                errorEl.textContent = '⚠️ Semua field harus diisi!';
+                errorEl.style.display = 'block';
+                return;
+            }
+
+            if (oldPass !== currentUser.password) {
+                errorEl.textContent = '⚠️ Password lama salah!';
+                errorEl.style.display = 'block';
+                document.getElementById('oldPassword').focus();
+                return;
+            }
+
+            if (newPass.length < 6) {
+                errorEl.textContent = '⚠️ Password baru minimal 6 karakter!';
+                errorEl.style.display = 'block';
+                document.getElementById('newPassword').focus();
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                errorEl.textContent = '⚠️ Konfirmasi password tidak cocok!';
+                errorEl.style.display = 'block';
+                document.getElementById('confirmNewPassword').focus();
+                return;
+            }
+
+            if (oldPass === newPass) {
+                errorEl.textContent = '⚠️ Password baru tidak boleh sama dengan password lama!';
+                errorEl.style.display = 'block';
+                document.getElementById('newPassword').focus();
+                return;
+            }
+
+            // Simpan password baru
+            if (updateUserPassword(currentUser.username, newPass)) {
+                tutupModalPassword();
+                showToastApp('✅ Password berhasil diubah!');
+            } else {
+                errorEl.textContent = '⚠️ Gagal mengubah password!';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        // Tutup modal password saat klik overlay
+        document.getElementById('modalUbahPassword').addEventListener('click', function(e) {
+            if (e.target === this) tutupModalPassword();
+        });
+
+        // ==================== LANDING PAGE SCRIPTS ====================
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        function scrollToSection(id) {
+            document.getElementById('navLinks').classList.remove('active');
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.addEventListener('click', (e) => {
+            const navLinks = document.getElementById('navLinks');
+            const hamburger = document.getElementById('hamburger');
+            if (!navLinks.contains(e.target) && !hamburger.contains(e.target)) {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        function showToastGlobal(message, isError = false) {
+            const existing = document.querySelector('.toast-global');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+[5/17/2026 7:37 PM] Hardy Cuank: toast.className = 'toast-global';
+            toast.style.cssText = 
+                position:fixed;bottom:24px;right:24px;
+                background:${isError ? '#dc2626' : '#10b981'};color:white;
+                padding:14px 24px;border-radius:20px;font-weight:600;
+                z-index:99999;animation:slideIn 0.4s ease;
+                box-shadow:0 4px 15px rgba(0,0,0,0.2);
+                font-family:'Segoe UI',system-ui,sans-serif;
+            ;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ==================== APLIKASI SURAT MENYURAT ====================
+        const STORAGE_KEY = 'suratku_db';
+        const LOGO_KEY = 'suratku_logos';
+        let appInitialized = false;
+        let currentTab = 'dashboard';
+        let selectedFiles = [];
+
+        function getData() {
+            try {
+                const data = localStorage.getItem(STORAGE_KEY);
+                return data ? JSON.parse(data) : { surat: [], lampiran: [] };
+            } catch (e) {
+                return { surat: [], lampiran: [] };
+            }
+        }
+
+        function saveData(data) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function getLogos() {
+            try {
+                const logos = localStorage.getItem(LOGO_KEY);
+                return logos ? JSON.parse(logos) : { sekolah: null, kabupaten: null, namaInstansi: '', alamatInstansi: '' };
+            } catch (e) {
+                return { sekolah: null, kabupaten: null, namaInstansi: '', alamatInstansi: '' };
+            }
+        }
+
+        function saveLogos(logos) {
+            localStorage.setItem(LOGO_KEY, JSON.stringify(logos));
+        }
+
+        function bukaAplikasi() {
+            if (!requireLogin()) return;
+            const modal = document.getElementById('appModal');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            updateUserDisplay();
+            if (!appInitialized) {
+                renderAplikasi();
+                appInitialized = true;
+            }
+            refreshDashboard();
+        }
+
+        function tutupAplikasi() {
+            document.getElementById('appModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('appModal').addEventListener('click', function(e) {
+            if (e.target === this) tutupAplikasi();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('modalUbahPassword').style.display === 'flex') {
+                    tutupModalPassword();
+                } else if (document.getElementById('appModal').classList.contains('active')) {
+                    tutupAplikasi();
+                }
+            }
+        });
+
+        // ==================== RENDER APLIKASI ====================
+        function renderAplikasi() {
+            const container = document.getElementById('appContainer');
+            container.innerHTML = `
+                <style>
+                    .app-wrap{font-family:'Segoe UI',system-ui,sans-serif;color:#1e293b;height:100%;display:flex;flex-direction:column}
+                    .nav-tabs{display:flex;gap:4px;padding:10px 14px;background:#f1f5f9;flex-wrap:wrap;border-bottom:1px solid #e2e8f0}
+                    .nav-tabs button{padding:8px 16px;border:none;border-radius:20px;cursor:pointer;font-weight:600;font-size:0.85em;transition:all 0.25s;background:white;color:#1e293b;font-family:inherit}
+                    .nav-tabs button:hover,.nav-tabs button.active{background:#2563eb;color:white}
+                    .tab-content{display:none;flex:1;overflow-y:auto;padding:16px}
+[5/17/2026 7:37 PM] Hardy Cuank: .tab-content.active{display:block;animation:fadeIn 0.3s ease}
+                    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+                    .card{background:white;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:16px}
+                    .card h4{margin-bottom:14px;color:#2563eb;font-size:1.1em}
+                    .form-group{margin-bottom:12px}
+                    .form-group label{display:block;font-weight:600;margin-bottom:4px;color:#64748b;font-size:0.85em}
+                    .form-group input,.form-group textarea,.form-group select{width:100%;padding:9px 12px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.9em;font-family:inherit;transition:border-color 0.3s}
+                    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.1)}
+                    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+                    .btn-sm{padding:8px 16px;border:none;border-radius:18px;cursor:pointer;font-weight:600;font-size:0.85em;transition:all 0.25s;display:inline-flex;align-items:center;gap:4px;font-family:inherit}
+                    .btn-primary{background:#2563eb;color:white}.btn-primary:hover{background:#1d4ed8}
+                    .btn-danger{background:#dc2626;color:white}.btn-danger:hover{background:#b91c1c}
+                    .btn-outline{background:white;color:#2563eb;border:2px solid #2563eb}.btn-outline:hover{background:#dbeafe}
+                    .btn-success{background:#10b981;color:white}
+                    .btn-warning{background:#f59e0b;color:white}
+                    table{width:100%;border-collapse:collapse;font-size:0.85em}
+                    th,td{padding:10px 8px;text-align:left;border-bottom:1px solid #e2e8f0}
+                    th{background:#f8fafc;font-weight:700;color:#64748b;white-space:nowrap}
+                    tr:hover{background:#f8fafc}
+                    .badge{padding:3px 8px;border-radius:10px;font-size:0.75em;font-weight:600}
+                    .badge-masuk{background:#d1fae5;color:#065f46}
+                    .badge-keluar{background:#dbeafe;color:#1e40af}
+                    .badge-draft{background:#fef3c7;color:#92400e}
+                    .stats-mini{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+                    .stat-mini{background:white;padding:16px;border-radius:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+                    .stat-mini h5{font-size:1.6em;color:#2563eb;margin:0}
+                    .stat-mini p{color:#64748b;font-size:0.8em;margin:4px 0 0}
+                    .upload-area{border:2px dashed #cbd5e1;border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:all 0.3s;margin-top:6px}
+                    .upload-area:hover{border-color:#2563eb;background:#f8fafc}
+                    .upload-area.has-logo{border-style:solid;border-color:#10b981;background:#f0fdf4}
+                    .file-list{margin-top:10px}
+                    .file-item{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:#f8fafc;border-radius:6px;margin-top:5px;font-size:0.85em}
+                    .empty-state{text-align:center;padding:30px;color:#94a3b8}
+                    .toast-app{position:fixed;bottom:20px;right:20px;padding:12px 22px;border-radius:20px;font-weight:600;z-index:9999;animation:slideIn 0.4s ease;box-shadow:0 4px 15px rgba(0,0,0,0.2);font-family:'Segoe UI',system-ui,sans-serif}
+                    .toast-app.success{background:#10b981;color:white}
+                    .toast-app.error{background:#dc2626;color:white}
+                    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+[5/17/2026 7:37 PM] Hardy Cuank: .letter-preview{background:white;border:2px solid #ddd;padding:28px;margin:14px 0;font-family:'Times New Roman',serif;line-height:1.8;min-height:200px}
+                    .letter-preview .kop{text-align:center;border-bottom:3px double #333;padding-bottom:12px;margin-bottom:18px}
+                    .letter-preview .kop-logos{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+                    .letter-preview .kop-logos img{max-height:70px;max-width:100px;object-fit:contain}
+                    .letter-preview .kop-logos .logo-placeholder{width:80px;height:70px;display:flex;align-items:center;justify-content:center;color:#cbd5e1;font-size:0.75em}
+                    .letter-preview .ttd{margin-top:30px;text-align:right}
+                    .search-box input{width:100%;max-width:350px}
+                    .logo-preview-img{max-height:60px;max-width:90px;object-fit:contain;border-radius:4px}
+                    .nomor-manual-hint{font-size:0.75em;color:#94a3b8;margin-top:2px}
+                    @media(max-width:600px){.form-row{grid-template-columns:1fr}.stats-mini{grid-template-columns:1fr 1fr}.nav-tabs button{font-size:0.75em;padding:6px 12px}}
+                    @media print{body *{visibility:hidden}.modal-overlay,.modal-app,.modal-body,.tab-content.active,.letter-preview,.letter-preview *{visibility:visible}.modal-overlay{position:absolute;top:0;left:0;background:white}.modal-app{box-shadow:none;width:100%;height:auto}.modal-header,.nav-tabs,.btn-sm{display:none}.tab-content{overflow:visible}}
+                </style>
+                <div class="app-wrap">
+                    <div class="nav-tabs">
+                        <button class="active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+                        <button onclick="switchTab('pengaturan')">⚙️ Pengaturan</button>
+                        <button onclick="switchTab('buat')">✍️ Buat Surat</button>
+                        <button onclick="switchTab('masuk')">📥 Surat Masuk</button>
+                        <button onclick="switchTab('keluar')">📤 Surat Keluar</button>
+                    </div>
+                    <div id="tab-dashboard" class="tab-content active"></div>
+                    <div id="tab-pengaturan" class="tab-content"></div>
+                    <div id="tab-buat" class="tab-content"></div>
+                    <div id="tab-masuk" class="tab-content"></div>
+                    <div id="tab-keluar" class="tab-content"></div>
+                </div>
+            ;
+
+            renderDashboardTab();
+            renderPengaturanTab();
+            renderBuatTab();
+            renderMasukTab();
+            renderKeluarTab();
+
+            const tglEl = document.getElementById('tanggalSurat');
+            if (tglEl) tglEl.value = new Date().toISOString().split('T')[0];
+
+            refreshDashboard();
+        }
+
+        // ==================== TAB RENDERING ====================
+        function renderDashboardTab() {
+            document.getElementById('tab-dashboard').innerHTML = 
+                <div class="stats-mini" id="statsMini"></div>
+                <div class="card"><h4>📋 Surat Terbaru</h4><div id="recentSurat"></div></div>
+            ;
+        }
+
+        function renderPengaturanTab() {
+            const logos = getLogos();
+            document.getElementById('tab-pengaturan').innerHTML = 
+                <div class="card">
+                    <h4>🏫 Upload Logo Instansi</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Logo Sekolah / Instansi</label>
+                            <div class="upload-area ${logos.sekolah?'has-logo':''}" onclick="document.getElementById('logoSekolahInput').click()">
+                                ${logos.sekolah?'<img src="'+logos.sekolah+'" class="logo-preview-img" style="max-height:80px;"><br><small style="color:#10b981;">✅ Terupload (klik ganti)</small>':'<p>📁 Klik upload logo sekolah</p><small style="color:#94a3b8;">Max 1MB, PNG/JPG</small>'}
+[5/17/2026 7:37 PM] Hardy Cuank: </div>
+                            <input type="file" id="logoSekolahInput" style="display:none" accept=".png,.jpg,.jpeg" onchange="handleLogoUpload(event,'sekolah')">
+                            ${logos.sekolah?'<button class="btn-sm btn-danger" style="margin-top:6px" onclick="hapusLogo(\'sekolah\')">🗑️ Hapus</button>':''}
+                        </div>
+                        <div class="form-group">
+                            <label>Logo Kabupaten / Kota</label>
+                            <div class="upload-area ${logos.kabupaten?'has-logo':''}" onclick="document.getElementById('logoKabupatenInput').click()">
+                                ${logos.kabupaten?'<img src="'+logos.kabupaten+'" class="logo-preview-img" style="max-height:80px;"><br><small style="color:#10b981;">✅ Terupload (klik ganti)</small>':'<p>📁 Klik upload logo kabupaten</p><small style="color:#94a3b8;">Max 1MB, PNG/JPG</small>'}
+                            </div>
+                            <input type="file" id="logoKabupatenInput" style="display:none" accept=".png,.jpg,.jpeg" onchange="handleLogoUpload(event,'kabupaten')">
+                            ${logos.kabupaten?'<button class="btn-sm btn-danger" style="margin-top:6px" onclick="hapusLogo(\'kabupaten\')">🗑️ Hapus</button>':''}
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h4>📝 Informasi Instansi</h4>
+                    <div class="form-group"><label>Nama Instansi / Sekolah</label><input type="text" id="namaInstansi" value="${logos.namaInstansi||''}" placeholder="Contoh: SD NEGERI 1 CONTOH"></div>
+                    <div class="form-group"><label>Alamat Instansi</label><input type="text" id="alamatInstansi" value="${logos.alamatInstansi||''}" placeholder="Contoh: Jl. Merdeka No. 123"></div>
+                    <button class="btn-sm btn-primary" onclick="simpanPengaturan()">💾 Simpan</button>
+                </div>
+                <div class="card">
+                    <h4>🔐 Keamanan Akun</h4>
+                    <p style="font-size:0.9em;margin-bottom:8px;">Login sebagai: <strong>${currentUser?currentUser.nama:'-'}</strong> (${currentUser?currentUser.username:'-'})</p>
+                    <button class="btn-sm btn-warning" onclick="bukaModalPassword()">🔒 Ubah Password</button>
+                    <button class="btn-sm btn-danger" onclick="logout()" style="margin-left:8px;">↩️ Logout</button>
+                </div>
+            ;
+        }
+
+        function renderBuatTab() {
+            document.getElementById('tab-buat').innerHTML = 
+                <div class="card">
+                    <h4>✍️ Buat Surat Baru</h4>
+                    <form id="formSurat" onsubmit="simpanSurat(event)">
+                        <div class="form-group"><label>Jenis Surat *</label><select id="jenisSurat" required onchange="generateNomorSurat()"><option value="">-- Pilih --</option><option value="masuk">Surat Masuk</option><option value="keluar">Surat Keluar</option></select></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Nomor Surat *</label><input type="text" id="nomorSurat" placeholder="Ketik manual atau klik Generate"><div class="nomor-manual-hint">✏️ <a href="#" onclick="generateNomorSurat();return false" style="color:#2563eb;">Klik Generate</a> untuk nomor otomatis</div></div>
+                            <div class="form-group"><label>Tanggal Surat *</label><input type="date" id="tanggalSurat" required></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Pengirim *</label><input type="text" id="pengirim" required></div>
+                            <div class="form-group"><label>Penerima *</label><input type="text" id="penerima" required></div>
+[5/17/2026 7:37 PM] Hardy Cuank: </div>
+                        <div class="form-group"><label>Perihal *</label><input type="text" id="perihal" required></div>
+                        <div class="form-group"><label>Isi Surat *</label><textarea id="isiSurat" rows="6" required></textarea></div>
+                        <div class="form-group"><label>Penanda Tangan</label><input type="text" id="penandaTangan" value="Pimpinan"></div>
+                        <div class="form-group"><label>📎 Lampiran</label><div class="upload-area" onclick="document.getElementById('fileInput').click()"><p>📁 Klik pilih file</p><small style="color:#94a3b8;">PDF, DOC, JPG, PNG (Max 10MB)</small></div><input type="file" id="fileInput" multiple style="display:none" onchange="handleFilePilih(event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png"><div class="file-list" id="fileList"></div></div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="submit" class="btn-sm btn-primary">💾 Simpan</button><button type="button" class="btn-sm btn-outline" onclick="previewSuratForm()">👁️ Preview</button><button type="reset" class="btn-sm btn-outline" onclick="resetFormSurat()">🔄 Reset</button></div>
+                    </form>
+                </div>
+            ;
+            const tglEl = document.getElementById('tanggalSurat');
+            if (tglEl) tglEl.value = new Date().toISOString().split('T')[0];
+        }
+
+        function renderMasukTab() {
+            document.getElementById('tab-masuk').innerHTML = 
+                <div class="card"><h4>📥 Surat Masuk</h4><div class="search-box"><input type="text" id="searchMasuk" placeholder="🔍 Cari..." onkeyup="loadSuratList('masuk')"></div><div style="overflow-x:auto"><table><thead><tr><th>No</th><th>Nomor</th><th>Tanggal</th><th>Pengirim</th><th>Perihal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbodyMasuk"></tbody></table></div></div>
+            ;
+        }
+
+        function renderKeluarTab() {
+            document.getElementById('tab-keluar').innerHTML = 
+                <div class="card"><h4>📤 Surat Keluar</h4><div class="search-box"><input type="text" id="searchKeluar" placeholder="🔍 Cari..." onkeyup="loadSuratList('keluar')"></div><div style="overflow-x:auto"><table><thead><tr><th>No</th><th>Nomor</th><th>Tanggal</th><th>Penerima</th><th>Perihal</th><th>Status</th><th>Aksi</th></tr></thead><tbody id="tbodyKeluar"></tbody></table></div></div>
+            `;
+        }
+
+        // ==================== LOGO MANAGEMENT ====================
+        function handleLogoUpload(event, jenis) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > 1048576) { showToastApp('❌ Maksimal 1MB!', true); event.target.value = ''; return; }
+            if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) { showToastApp('❌ Hanya PNG/JPG!', true); event.target.value = ''; return; }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const logos = getLogos();
+                logos[jenis] = e.target.result;
+                saveLogos(logos);
+                renderPengaturanTab();
+                showToastApp('✅ Logo berhasil diupload!');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function hapusLogo(jenis) {
+            if (confirm('Hapus logo ini?')) {
+                const logos = getLogos();
+                logos[jenis] = null;
+                saveLogos(logos);
+                renderPengaturanTab();
+                showToastApp('🗑️ Logo dihapus');
+            }
+        }
+
+        function simpanPengaturan() {
+            const logos = getLogos();
+            logos.namaInstansi = document.getElementById('namaInstansi')?.value || '';
+            logos.alamatInstansi = document.getElementById('alamatInstansi')?.value || '';
+            saveLogos(logos);
+            showToastApp('✅ Pengaturan disimpan!');
+        }
+[5/17/2026 7:37 PM] Hardy Cuank: // ==================== TAB SWITCHING ====================
+        function switchTab(tabName) {
+            currentTab = tabName;
+            ['dashboard', 'pengaturan', 'buat', 'masuk', 'keluar'].forEach(t => {
+                const el = document.getElementById(tab-${t});
+                if (el) el.classList.toggle('active', t === tabName);
+            });
+            const buttons = document.querySelectorAll('.nav-tabs button');
+            ['dashboard', 'pengaturan', 'buat', 'masuk', 'keluar'].forEach((t, i) => {
+                if (buttons[i]) buttons[i].classList.toggle('active', t === tabName);
+            });
+            if (tabName === 'dashboard') refreshDashboard();
+            if (tabName === 'pengaturan') renderPengaturanTab();
+            if (tabName === 'masuk') loadSuratList('masuk');
+            if (tabName === 'keluar') loadSuratList('keluar');
+            if (tabName === 'buat') {
+                const tglEl = document.getElementById('tanggalSurat');
+                if (tglEl) tglEl.value = new Date().toISOString().split('T')[0];
+                generateNomorSurat();
+            }
+        }
+
+        // ==================== DATA OPERATIONS ====================
+        function getAllSurat() { return getData().surat || []; }
+
+        function getSuratById(id) { return getAllSurat().find(s => s.id === id); }
+
+        function addSurat(suratData) {
+            const data = getData();
+            const surat = { ...suratData, id: Date.now().toString(), createdBy: currentUser ? currentUser.username : 'unknown', createdAt: new Date().toISOString(), lampiran: [] };
+            data.surat.unshift(surat);
+            saveData(data);
+            return surat;
+        }
+
+        function deleteSuratById(id) {
+            const data = getData();
+            data.surat = data.surat.filter(s => s.id !== id);
+            data.lampiran = data.lampiran.filter(l => l.suratId !== id);
+            saveData(data);
+        }
+
+        function addLampiran(suratId, fileData) {
+            const data = getData();
+            const lampiran = { id: Date.now().toString(), suratId, namaAsli: fileData.namaAsli, namaFile: fileData.namaFile, tipeFile: fileData.tipeFile, ukuranFile: fileData.ukuranFile, dataUrl: fileData.dataUrl, createdAt: new Date().toISOString() };
+            data.lampiran.push(lampiran);
+            const surat = data.surat.find(s => s.id === suratId);
+            if (surat) { if (!surat.lampiran) surat.lampiran = []; surat.lampiran.push(lampiran.id); }
+            saveData(data);
+            return lampiran;
+        }
+
+        function getLampiranBySuratId(suratId) { return getData().lampiran.filter(l => l.suratId === suratId); }
+
+        // ==================== DASHBOARD ====================
+        function refreshDashboard() {
+            const surat = getAllSurat();
+            const m = surat.filter(s => s.jenis === 'masuk').length;
+            const k = surat.filter(s => s.jenis === 'keluar').length;
+            const statsEl = document.getElementById('statsMini');
+            if (statsEl) statsEl.innerHTML = <div class="stat-mini"><h5>${surat.length}</h5><p>Total</p></div><div class="stat-mini"><h5>${m}</h5><p>Masuk</p></div><div class="stat-mini"><h5>${k}</h5><p>Keluar</p></div><div class="stat-mini"><h5>${getData().lampiran.length}</h5><p>Lampiran</p></div>;
+            const recentEl = document.getElementById('recentSurat');
+            if (recentEl) {
+                const recent = surat.slice(0, 5);
+                recentEl.innerHTML = recent.length === 0 ? '<div class="empty-state">📭 Belum ada surat</div>' : <table><thead><tr><th>Nomor</th><th>Tanggal</th><th>Jenis</th><th>Perihal</th><th>Aksi</th></tr></thead><tbody>${recent.map(s => <tr><td><strong>${s.nomorSurat}</strong></td><td>${formatTanggal(s.tanggalSurat)}</td><td><span class="badge ${s.jenis==='masuk'?'badge-masuk':'badge-keluar'}">${s.jenis==='masuk'?'Masuk':'Keluar'}</span></td><td>${s.perihal}</td><td><button class="btn-sm btn-outline" style="padding:3px 8px;font-size:0.75em"
+[5/17/2026 7:37 PM] Hardy Cuank: onclick="lihatSurat('${s.id}')">👁️</button></td></tr>).join('')}</tbody></table>;
+            }
+        }
+
+        // ==================== LOAD SURAT LIST ====================
+        function loadSuratList(jenis) {
+            const keyword = (document.getElementById(search${jenis.charAt(0).toUpperCase()+jenis.slice(1)})?.value || '').toLowerCase();
+            const tbody = document.getElementById(tbody${jenis.charAt(0).toUpperCase()+jenis.slice(1)});
+            if (!tbody) return;
+            let surat = getAllSurat().filter(s => s.jenis === jenis);
+            if (keyword) surat = surat.filter(s => s.nomorSurat.toLowerCase().includes(keyword)  s.pengirim.toLowerCase().includes(keyword)  s.penerima.toLowerCase().includes(keyword) || s.perihal.toLowerCase().includes(keyword));
+            tbody.innerHTML = surat.length === 0 ? '<tr><td colspan="7" class="empty-state">📭 Tidak ada surat</td></tr>' : surat.map((s, i) => <tr><td>${i+1}</td><td><strong>${s.nomorSurat}</strong></td><td>${formatTanggal(s.tanggalSurat)}</td><td>${jenis==='masuk'?s.pengirim:s.penerima}</td><td>${s.perihal}</td><td><span class="badge badge-draft">${s.status||'draft'}</span></td><td><button class="btn-sm btn-outline" style="padding:3px 6px;font-size:0.7em" onclick="lihatSurat('${s.id}')">👁️</button> <button class="btn-sm btn-danger" style="padding:3px 6px;font-size:0.7em" onclick="hapusSurat('${s.id}')">🗑️</button></td></tr>).join('');
+        }
+
+        // ==================== SIMPAN SURAT ====================
+        function simpanSurat(event) {
+            event.preventDefault();
+            const j = document.getElementById('jenisSurat')?.value;
+            let n = document.getElementById('nomorSurat')?.value.trim();
+            if (!n) n = generateNomorFallback(j);
+            const suratData = { jenis: j, nomorSurat: n, tanggalSurat: document.getElementById('tanggalSurat')?.value, pengirim: document.getElementById('pengirim')?.value.trim(), penerima: document.getElementById('penerima')?.value.trim(), perihal: document.getElementById('perihal')?.value.trim(), isiSurat: document.getElementById('isiSurat')?.value.trim(), penandaTangan: document.getElementById('penandaTangan')?.value.trim() || 'Pimpinan', status: 'draft' };
+            const saved = addSurat(suratData);
+            if (selectedFiles.length > 0 && saved) {
+                selectedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) { addLampiran(saved.id, { namaAsli: file.name, namaFile: surat_${Date.now()}_${file.name}, tipeFile: file.type, ukuranFile: file.size, dataUrl: e.target.result }); };
+                    reader.readAsDataURL(file);
+                });
+                selectedFiles = [];
+                const fl = document.getElementById('fileList');
+                if (fl) fl.innerHTML = '';
+            }
+            document.getElementById('formSurat').reset();
+            document.getElementById('nomorSurat').value = '';
+            document.getElementById('jenisSurat').value = '';
+            document.getElementById('tanggalSurat').value = new Date().toISOString().split('T')[0];
+            showToastApp('✅ Surat disimpan!');
+            switchTab('dashboard');
+        }
+
+        function generateNomorFallback(jenis) {
+            if (!jenis) return '';
+            const count = getAllSurat().filter(s => s.jenis === jenis).length + 1;
+            const now = new Date();
+            return ${String(count).padStart(3,'0')}/${jenis==='masuk'?'SM':'SK'}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()};
+        }
+
+        function generateNomorSurat() {
+            const j = document.getElementById('jenisSurat')?.value;
+            const n = document.getElementById('nomorSurat');
+            if (n && j) n.value = generateNomorFallback(j);
+            else if (n) n.value = '';
+        }
+[5/17/2026 7:37 PM] Hardy Cuank: function resetFormSurat() {
+            document.getElementById('nomorSurat').value = '';
+            document.getElementById('jenisSurat').value = '';
+            document.getElementById('fileList').innerHTML = '';
+            selectedFiles = [];
+        }
+
+        // ==================== FILE HANDLING ====================
+        function handleFilePilih(event) { selectedFiles = [...selectedFiles, ...Array.from(event.target.files)]; renderFileList(); event.target.value = ''; }
+
+        function renderFileList() {
+            const c = document.getElementById('fileList');
+            if (c) c.innerHTML = selectedFiles.map((f, i) => <div class="file-item"><span>📎 ${f.name} (${formatUkuran(f.size)})</span><button class="btn-sm btn-danger" style="padding:2px 6px;font-size:0.7em" onclick="hapusFile(${i})">✕</button></div>).join('');
+        }
+
+        function hapusFile(i) { selectedFiles.splice(i, 1);
+            renderFileList(); }
+
+        // ==================== LIHAT SURAT ====================
+        function lihatSurat(id) {
+            const s = getSuratById(id);
+            if (!s) { showToastApp('❌ Surat tidak ditemukan', true); return; }
+            const lampiran = getLampiranBySuratId(id);
+            const logos = getLogos();
+            let lHTML = lampiran.length > 0 ? '<p><strong>📎 Lampiran:</strong></p><ul>' + lampiran.map(l => <li><a href="${l.dataUrl}" download="${l.namaAsli}" target="_blank">${l.namaAsli}</a> (${formatUkuran(l.ukuranFile)})</li>).join('') + '</ul>' : '';
+            const logoKiri = logos.sekolah ? <img src="${logos.sekolah}" alt="Logo Sekolah"> : '<div class="logo-placeholder">Logo<br>Sekolah</div>';
+            const logoKanan = logos.kabupaten ? <img src="${logos.kabupaten}" alt="Logo Kabupaten"> : '<div class="logo-placeholder">Logo<br>Kabupaten</div>';
+            const html = <div class="letter-preview"><div class="kop"><div class="kop-logos"><div>${logoKiri}</div><div style="text-align:center;flex:1"><h3 style="margin:0;font-size:1.1em">${logos.namaInstansi||'NAMA INSTANSI'}</h3><p style="margin:4px 0;font-size:0.85em">${logos.alamatInstansi||'Alamat Instansi'}</p></div><div>${logoKanan}</div></div><hr style="border:1px solid #333;margin:8px 0"><h4 style="margin:6px 0">${s.jenis==='masuk'?'SURAT MASUK':'SURAT KELUAR'}</h4><p>Nomor: ${s.nomorSurat}</p><p>Tanggal: ${formatTanggal(s.tanggalSurat)}</p></div><p><strong>Kepada Yth:</strong><br>${s.penerima}</p><p><strong>Dari:</strong><br>${s.pengirim}</p><p><strong>Perihal:</strong> ${s.perihal}</p><div class="isi">${s.isiSurat.replace(/\n/g,'<br>')}</div>${lHTML}<div class="ttd"><p>Hormat kami,</p><br><br><p><strong>${s.penandaTangan}</strong></p></div></div>;
+            bukaModalPreview(html);
+        }
+
+        function previewSuratForm() {
+            const logos = getLogos();
+            const j = document.getElementById('jenisSurat')?.value || 'keluar';
+            const n = document.getElementById('nomorSurat')?.value || '(Nomor)';
+            const tgl = document.getElementById('tanggalSurat')?.value || new Date().toISOString().split('T')[0];
+            const logoKiri = logos.sekolah ? <img src="${logos.sekolah}" alt="Logo Sekolah"> : '<div class="logo-placeholder">Logo<br>Sekolah</div>';
+            const logoKanan = logos.kabupaten ? <img src="${logos.kabupaten}" alt="Logo Kabupaten"> : '<div class="logo-placeholder">Logo<br>Kabupaten</div>';
+            const html = `<div class="letter-preview"><div class="kop"><div class="kop-logos"><div>${logoKiri}</div><div style="text-align:center;flex:1"><h3 style="margin:0;font-size:1.1em">${logos.namaInst'NAMA INSTANSI'}</h3><p style="margin:4px 0;font-size:0.85em">${logos.alamatInstansisi||'Alamat Instansi'}</p></div><div>${logoKanan}</div></div><hr style="border:1px solid #333;margin:8px 0"><h4 style="margin:6px 0">${j==='masuk'?'SURAT MASUK':'SURAT KELUAR'}</h4><p>Nomor: ${n}</p><p>Tanggal:
+[5/17/2026 7:37 PM] Hardy Cuank: ${formatTanggal(tgl)}</p></div><p><strong>Kepada:</strong><br>${document.getElementById('penerima')?.value'(Penerima)'}</p><p><strong>Dari:</strong><br>${document.getElementById('pengirim')?.value'(Pengirim)'}</p><p><strong>Perihal:</strong> ${document.getElementById('perihal')?.value'(Perihal)'}</p><div class="isi">${(document.getElementById('isiSurat')?.value'(Isi)').replace(/\n/g,'<br>')}</div><div class="ttd"><p>Hormat kami,</p><br><br><p><strong>${document.getElementById('penandaTangan')?.value||'Pimpinan'}</strong></p></div></div>;
+            bukaModalPreview(html);
+        }
+
+        function bukaModalPreview(html) {
+            const old = document.getElementById('modalPreviewSurat');
+            if (old) old.remove();
+            const modal = document.createElement('div');
+            modal.id = 'modalPreviewSurat';
+            modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:10000;display:flex;justify-content:center;align-items:center;';
+            modal.innerHTML = <div style="background:white;border-radius:12px;padding:24px;max-width:750px;width:94%;max-height:85vh;overflow-y:auto"><h4 style="margin-bottom:14px;color:#2563eb">📄 Preview Surat</h4>${html}<div style="display:flex;gap:8px;margin-top:12px"><button class="btn-sm btn-primary" onclick="window.print()">🖨️ Cetak</button><button class="btn-sm btn-outline" onclick="document.getElementById('modalPreviewSurat').remove()">❌ Tutup</button></div></div>;
+            modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
+            document.body.appendChild(modal);
+        }
+
+        // ==================== HAPUS SURAT ====================
+        function hapusSurat(id) {
+            if (!confirm('Hapus surat ini?')) return;
+            deleteSuratById(id);
+            showToastApp('✅ Surat dihapus');
+            refreshDashboard();
+            if (currentTab === 'masuk') loadSuratList('masuk');
+            if (currentTab === 'keluar') loadSuratList('keluar');
+        }
+
+        // ==================== UTILITAS ====================
+        function formatTanggal(t) {
+            if (!t) return '-';
+            const d = new Date(t);
+            if (isNaN(d.getTime())) return t;
+            const b = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+            return ${d.getDate()} ${b[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        function formatUkuran(b) {
+            if (!b) return '0 B';
+            if (b < 1024) return b + ' B';
+            if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+            return (b / 1048576).toFixed(1) + ' MB';
+        }
+
+        function showToastApp(msg, err = false) {
+            const old = document.querySelector('.toast-app');
+            if (old) old.remove();
+            const t = document.createElement('div');
+            t.className = 'toast-app ' + (err ? 'error' : 'success');
+            t.textContent = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+
+        // ==================== INIT ====================
+        function init() {
+            // Pastikan default users tersimpan
+            getUsers();
+            // Cek session
+            checkSession();
+            console.log('✅ SuratKu siap!');
+            console.log('🔑 Username: admin | staff | kepsek | guru');
+            console.log('🔑 Password default sesuai username + "123" (contoh: admin123)');
+            console.log('🔒 Password bisa diubah di tab Pengaturan > Ubah Password');
+            console.log('📋 Nomor surat bisa manual atau auto-generate');
+        }
+
+        init();
+    </script>
+</body>
+</html>
